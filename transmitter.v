@@ -1,69 +1,66 @@
-module transmitter(input clk , wr_enable,reset, input [7:0] data_in, output reg tx , output busy);
-  
-  parameter idle_state=2'b00;
-  parameter start_state=2'b01;
-  parameter data_state= 2'b10;
-  parameter stop_state=2'b11;
-  
-  reg [7:0] data;
-  reg [2:0] index;
-  reg [1:0] state = idle_state;
-  
-  
-  always @(posedge clk)
-    begin
-      if(reset)
-        tx=1'b1;
-    end
-  always@(posedge clk)
-    begin 
-      case(state)
-        idle_state : 
-          begin
-            if(wr_enable)
-              begin 
-                state<=start_state;
-                data<=data_in;
-                index<=3'h0;
-              end
-            else
-              state=idle_state;
-            
-          end
-        start_state :
-          begin 
-            if(enable)
-              begin
-                tx<=1'b0;
-                state <=data_state;
-              end
-            else
-              state<=start_state;
-            end
-            data_state : 
-            begin
-              if(index=3'h7)
-                state<=stop_state;
-            end
-        else
-          index = index + 1'h1;
-        tx<=data[index];
+
+`timescale 1ns/1ps
+
+module sender(input clk,wr_en,enb,reset, input reg[7:0]data_in,output reg tx,busy);
+
+  parameter IDLE_STATE=2'b00;
+  parameter START_STATE=2'b01;
+  parameter DATA_STATE=2'b10;
+  parameter STOP_STATE = 2'b11;
+
+  reg[7:0]data=8'h00;
+  reg[2:0]bitpos = 3'h0;
+  reg[1:0]state=IDLE_STATE;
+
+      always@(posedge clk)begin
+        if(rst)begin
+          tx=1'b1;
         end
-        stop_state : 
-          begin 
-            if(enable)
-               tx=1'b1;
-              state<=idle_state;
-            
-          end
-        end
-        default :begin
-          tx<=1'b1;
-          
-          state<=idle_state;
-        end
-      endcase
-    end
-  assign busy = (state!=idle_state);
-endmodule
+      end
+      always@(posedge clk)begin
         
+        case(state)
+          STATE_IDLE : begin
+            if(wr_enb)begin
+          state<=START_STATE;
+              data=data_in;
+            bitpos=3'h0;
+            end
+          end
+
+          START_STATE:begin
+            if(enb)begin
+              tx<=1'b0;
+            state<=DATA_STATE;
+            end
+          end
+
+          DATA_STATE:begin
+            if(enb)begin
+              if(bitpos=3'h7)begin
+              state<=STOP_STATE;
+                else
+                  bitpos=bitpos+3'h1;
+                tx<=data[bitpos]
+              end
+            end
+          end
+            STOP_STATE:begin
+              if(enb)begin
+                tx=1'b1;
+              state<=IDLE_STATE:
+              end
+            end
+        endcase
+        default:begin
+           tx=1'b1;
+              state<=IDLE_STATE:
+              end
+
+        
+
+          assign busy= (state!=IDLE_STATE);
+          endmodule
+            
+          
+      
