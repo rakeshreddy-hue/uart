@@ -1,4 +1,5 @@
-module baud_ratewe_generator(input clk,reset,output tx_en,rx_en);
+`timescale 1ns / 1ps
+module baud_rate_generator(input clk,reset,output tx_en,rx_en);
   parameter clock_frequency=100000000;
   parameter baud_rate=9600;
 
